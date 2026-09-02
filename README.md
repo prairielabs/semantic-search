@@ -18,7 +18,7 @@ Most AI products hide their behavior inside weights and server code. A prompt-na
 
 There is no binary. Tell your coding agent (Claude Code, Codex, or similar):
 
-> **read this: https://github.com/prairielabs/semantic-search/blob/main/READTHIS.txt**
+> **read this: https://github.com/prairielabs/semantic-search/blob/main/HARNESSED_AGENT_READ_THIS.md**
 
 The installer is written in [Scissortail](https://github.com/prairielabs/scissortail) and is addressed to the model. It will acquire the two files, read the program, serve the page, and become the runtime. Then you search.
 

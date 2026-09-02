@@ -2,7 +2,7 @@
 ║                                                                             ║
 ║                      S E M A N T I C   S E A R C H                          ║
 ║                                                                             ║
-║                     READTHIS.txt — the installer                            ║
+║                     HARNESSED_AGENT_READ_THIS.md — the installer                            ║
 ║                                                                             ║
 ║          A human said "read this" and now installation has begun.           ║
 ║                                                                             ║
@@ -99,5 +99,5 @@ FINAL LOCK
 If you have read this far, the installer has run. There is nothing left to
 download. Acquire, read, serve, declare — then search.
 
-END READTHIS
+END HARNESSED_AGENT_READ_THIS
 signature: cs1
