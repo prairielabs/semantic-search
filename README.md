@@ -14,6 +14,14 @@ Most AI products hide their behavior inside weights and server code. A prompt-na
 - **Portable** — no build step, no backend lock-in; the program travels as text
 - **Controllable** — editing the software is editing prose with structure
 
+## Install
+
+There is no binary. Tell your coding agent (Claude Code, Codex, or similar):
+
+> **read this: https://github.com/prairielabs/semantic-search/blob/main/READTHIS.txt**
+
+The installer is written in [Scissortail](https://github.com/prairielabs/scissortail) and is addressed to the model. It will acquire the two files, read the program, serve the page, and become the runtime. Then you search.
+
 ## Reading order
 
 1. [`context.md`](context.md) — the program. Written in Scissortail; meant to be read top-to-bottom by people and models alike.
