@@ -101,6 +101,12 @@ CONST RESULTS_MAX             = 20
 CONST SCORE_SCALE             = "0.0 through 10.0, exactly one decimal"
 CONST SUMMARY_LENGTH          = "one to two short sentences"
 CONST CREDIT_TEXT             = "prairielabs.ai"
+CONST PARSE_MAX               = 40
+CONST DEFAULT_MODEL           = "openai/gpt-5.6-luna"
+                                — for a runtime that carries a model choice
+                                  (a desktop or hosted host); a harness
+                                  operator is otherwise the model itself.
+                                  Never rendered, never named on the page.
 
 
 ════════════════════════════════════════════════════════════════════════════════
@@ -297,6 +303,24 @@ One verified source on a results page. Rendered as one
 
 END
 
+STRUCTURE Candidate
+
+One parsed row of trusted live-search output, before judgment. Built by
+ParseRetrieval, consumed by EvaluateAndRank. Never rendered directly.
+
+    url          : text [literal]   — exact trusted destination, byte-for-byte
+    canonical    : text [computed]  — comparison key only: scheme and host
+                                      lowercased, default port dropped,
+                                      tracking parameters and fragment removed
+    domain       : text             — host without scheme
+    title        : text             — trimmed, at most 120 characters
+    snippet      : text             — whitespace collapsed, at most 300 characters
+    date_or_type : text | null      — when the provider returned one
+    language     : text | null      — best guess from title and snippet
+    position     : number           — provider order, 1-based
+
+END
+
 STRUCTURE Preferences
 
 Trusted local interface state.
@@ -378,14 +402,54 @@ END
 §7. SEARCH DOCTRINE
 ════════════════════════════════════════════════════════════════════════════════
 
-KERNEL EvaluateAndRank
+KERNEL ParseRetrieval
 
-Turn trusted retrieval output into the ranked source set.
+Turn trusted live-search output into a compact candidate table before any
+judgment is spent. Reading is cheap when it is structured; judging is the
+expensive step, so it is spent on rows, not on provider prose. This is the
+speed step: the whole retrieval is reduced once, then ranked.
 
 INPUT:
-    query   : text                 — the user's exact query
-    output  : trusted live-search output for this turn
-    language: text                 — selected interface language
+    output  : trusted live-search output for this turn — raw provider order,
+              possibly containing near-duplicates
+
+OUTPUT:
+    candidates : list<Candidate>
+
+PROCESS:
+
+    1. Extract
+        One Candidate per URL-bearing item, in provider order. Copy url
+        byte-for-byte. Derive canonical for comparison only. Trim title to
+        120 characters and snippet to 300, collapsing whitespace. Carry
+        date_or_type when the provider returned one. Guess language from
+        title and snippet.
+
+    2. Drop
+        Non-HTTP(S) items; items with neither title nor snippet; exact
+        canonical duplicates (keep the first). Do not judge quality here.
+
+    3. Bound
+        Keep at most PARSE_MAX candidates by provider order.
+
+    4. Emit
+        RETURN the table and nothing else. No scores, no summaries, no
+        ordering by merit — those belong to EvaluateAndRank.
+
+FAILURE_BEHAVIOR:
+    - If output yields no Candidate at all, treat the turn as a retrieval
+      failure per §6. Never fill the table from memory.
+
+END
+
+KERNEL EvaluateAndRank
+
+Turn the parsed candidate table into the ranked source set.
+
+INPUT:
+    query      : text                 — the user's exact query
+    candidates : list<Candidate>      — from ParseRetrieval, this turn
+    language   : text                 — selected interface language
 
 PROCESS:
 
@@ -494,12 +558,13 @@ PROCESS:
     2. Route
         IF primary search submission THEN
             the trusted runtime has executed the exact submitted query;
-            run EvaluateAndRank on the trusted output;
+            run ParseRetrieval on the trusted output, then EvaluateAndRank
+            on the candidate table;
             RENDER ResultsPage with the top RESULTS_INITIAL sources
         IF search-more THEN
             another retrieval for the exact current query, with bounded
             exclusions derived from the current marked results;
-            run EvaluateAndRank; append only provider-verified novel
+            run ParseRetrieval then EvaluateAndRank; append only provider-verified novel
             sources — RESULTS_PER_EXPANSION per pass — onto the existing
             set, merged and ranked, up to RESULTS_MAX;
             RENDER ResultsPage
@@ -1002,6 +1067,23 @@ CURRENT PATCHES:
                 index.html; model judgment is never enforced in code
         affected_sections: §7 SEARCH DOCTRINE, §8 TURN KERNEL (authority
                 unchanged; the runtime now supplies rawer input)
+        status: active
+
+    PATCH 2026-09-02
+        scope: SEARCH DOCTRINE, STRUCTURES, CONSTANTS, TURN KERNEL routing
+        change: added ParseRetrieval — a parse step that reduces trusted
+                live-search output to a bounded Candidate table (PARSE_MAX
+                rows; url byte-for-byte, canonical comparison key, trimmed
+                title and snippet, provider position) before any judgment;
+                EvaluateAndRank now consumes that table. Added the Candidate
+                structure. Added DEFAULT_MODEL = "openai/gpt-5.6-luna" for a
+                runtime that carries a model choice; a harness operator
+                remains the model itself. The page never names either.
+        reason: operator directive — introduce parsing to increase search
+                speed; default to Luna. Judgment is the expensive step;
+                reading provider prose is not, once it is a table.
+        affected_sections: §2 CONSTANTS, §5 STRUCTURES, §7 SEARCH DOCTRINE,
+                §8 TURN KERNEL (routing only; authority unchanged)
         status: active
 
 USER INPUTS:

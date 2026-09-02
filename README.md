@@ -33,3 +33,7 @@ The installer is written in [Scissortail](https://github.com/prairielabs/scissor
 Extracted from the private Prairie Labs platform, where Semantic Search has shipped as a product (web, and a standalone macOS desktop build). Created by [Prairie Labs, Inc](https://prairielabs.ai) — the General Simulation Company.
 
 MIT licensed.
+
+## 2026-09-02 patch
+
+The program now parses before it judges: `ParseRetrieval` reduces trusted live-search output to a bounded candidate table, and `EvaluateAndRank` spends its judgment on that table. A runtime that carries a model choice defaults to Luna. Both are recorded as `PATCH 2026-09-02` in `context.md` §13; the page itself is unchanged.
