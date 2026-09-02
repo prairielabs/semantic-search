@@ -1,0 +1,700 @@
+<!doctype html>
+<html lang="en" data-prairie-app="semantic-search" data-prairie-version="2" data-prairie-page="title" data-prairie-theme="light" data-prairie-language="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Semantic Search</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #191a1f;
+      background: #f8f7f4;
+      --canvas: #f8f7f4;
+      --ambient: rgba(231, 101, 55, 0.075);
+      --surface: rgba(255, 255, 255, 0.9);
+      --surface-strong: #ffffff;
+      --surface-soft: #f0efeb;
+      --ink: #191a1f;
+      --muted: #686a73;
+      --faint: #8b8d94;
+      --line: #dddcd7;
+      --line-strong: #c9c7c0;
+      --focus: #7556b2;
+      --shadow: 0 18px 54px rgba(35, 30, 25, 0.08);
+      --shadow-soft: 0 8px 28px rgba(35, 30, 25, 0.055);
+      --brand-gradient: linear-gradient(100deg, #f08a18 0%, #ef522b 34%, #d33e5c 58%, #8d5da8 79%, #5f70c1 100%);
+      --meter-track: #e5e3df;
+      --error-surface: #fff8f5;
+      --error-line: #e6c8bd;
+    }
+
+    :root[data-prairie-theme="dark"] {
+      color-scheme: dark;
+      color: #f3f1ed;
+      background: #131419;
+      --canvas: #131419;
+      --ambient: rgba(155, 93, 184, 0.12);
+      --surface: rgba(30, 31, 38, 0.92);
+      --surface-strong: #202129;
+      --surface-soft: #292a32;
+      --ink: #f3f1ed;
+      --muted: #b2b1ba;
+      --faint: #92919b;
+      --line: #383942;
+      --line-strong: #4b4c56;
+      --focus: #b399e5;
+      --shadow: 0 20px 58px rgba(0, 0, 0, 0.28);
+      --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.2);
+      --brand-gradient: linear-gradient(100deg, #ff9a22 0%, #ff6240 34%, #e75475 58%, #a879c3 79%, #7889db 100%);
+      --meter-track: #34353d;
+      --error-surface: #251d1f;
+      --error-line: #644149;
+    }
+
+    * { box-sizing: border-box; }
+
+    html,
+    body {
+      min-width: 100%;
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      overflow-x: hidden;
+      background:
+        radial-gradient(circle at 48% 31%, var(--ambient), transparent min(44rem, 72vw)),
+        var(--canvas);
+      color: var(--ink);
+    }
+
+    button,
+    input { font: inherit; }
+
+    button { color: inherit; }
+
+    a { color: inherit; }
+
+    .page-shell { min-height: 100vh; }
+
+    .utility-bar {
+      display: flex;
+      align-items: center;
+      min-height: 74px;
+      padding: 12px 132px 10px 18px;
+    }
+
+    .preferences {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .language-selector {
+      display: flex;
+      align-items: center;
+      padding: 2px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+      box-shadow: 0 1px 2px rgba(25, 26, 31, 0.035);
+    }
+
+    .language-option,
+    .theme-toggle {
+      min-height: 44px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+    }
+
+    .language-option {
+      width: 44px;
+      padding: 0;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 680;
+      letter-spacing: 0.045em;
+    }
+
+    .language-option[aria-pressed="true"] {
+      background: var(--surface-strong);
+      color: var(--ink);
+      box-shadow: 0 2px 9px rgba(27, 26, 31, 0.09);
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-width: 72px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: color-mix(in srgb, var(--surface) 78%, transparent);
+      font-size: 0.75rem;
+      font-weight: 660;
+    }
+
+    .theme-glyph {
+      color: #8c5dae;
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .inference-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      flex: 0 1 auto;
+      min-width: 0;
+      margin-left: 10px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: 1.3;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .inference-note-icon {
+      font-size: 0.82rem;
+      line-height: 1;
+    }
+
+    .language-option:hover,
+    .theme-toggle:hover { background: var(--surface-soft); }
+
+    .language-option:focus-visible,
+    .theme-toggle:focus-visible,
+    .search-submit:focus-visible,
+    .more-submit:focus-visible,
+    .retry-submit:focus-visible,
+    .result-card > a:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .title-page {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: calc(100vh - 74px);
+      padding: 24px 24px clamp(88px, 16vh, 150px);
+    }
+
+    .title-stage {
+      width: min(690px, 100%);
+      text-align: center;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 0 0 34px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.7rem, 6.5vw, 4.15rem);
+      font-weight: 560;
+      letter-spacing: -0.052em;
+      line-height: 0.98;
+    }
+
+    [data-prairie-trusted-asset="semantic-search-logo"] {
+      display: inline-block;
+      flex: 0 0 auto;
+      width: clamp(36px, 5vw, 44px);
+      height: clamp(36px, 5vw, 44px);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
+
+    .wordmark-text {
+      display: inline-flex;
+      align-items: baseline;
+      color: #d33e5c;
+    }
+
+    .wordmark-letter {
+      display: inline-block;
+      transform: translateY(0);
+    }
+
+    .wordmark-break { margin-inline-start: 0.24em; }
+
+    @supports ((background-clip: text) or (-webkit-background-clip: text)) {
+      .wordmark-text {
+        background: var(--brand-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .wordmark-letter {
+        background: var(--brand-gradient);
+        background-size: 1400% 100%;
+        background-position: var(--gradient-position, 0%) 50%;
+        background-repeat: no-repeat;
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+      }
+    }
+
+    .search-form { width: 100%; }
+
+    .search-shell {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) auto;
+      align-items: center;
+      width: 100%;
+      min-height: 62px;
+      padding: 5px 6px 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background: var(--surface);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .search-shell:hover {
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow);
+    }
+
+    .search-shell:focus-within {
+      border-color: var(--focus);
+      outline: 3px solid color-mix(in srgb, var(--focus) 24%, transparent);
+      outline-offset: 2px;
+      box-shadow: var(--shadow);
+    }
+
+    .search-symbol {
+      position: relative;
+      display: block;
+      width: 44px;
+      height: 44px;
+      pointer-events: none;
+    }
+
+    .search-symbol::before {
+      content: "";
+      position: absolute;
+      top: 13px;
+      left: 12px;
+      width: 12px;
+      height: 12px;
+      border: 1.8px solid var(--faint);
+      border-radius: 50%;
+    }
+
+    .search-symbol::after {
+      content: "";
+      position: absolute;
+      top: 26px;
+      left: 25px;
+      width: 8px;
+      height: 1.8px;
+      border-radius: 2px;
+      background: var(--faint);
+      transform: rotate(45deg);
+      transform-origin: left center;
+    }
+
+    #query {
+      width: 100%;
+      min-width: 0;
+      height: 50px;
+      padding: 0 12px 0 3px;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 1.025rem;
+    }
+
+    #query::placeholder { color: var(--faint); opacity: 1; }
+
+    #query::-webkit-search-cancel-button { cursor: pointer; }
+
+    .search-submit,
+    .more-submit,
+    .retry-submit {
+      min-height: 48px;
+      border: 1px solid color-mix(in srgb, #d94a52 34%, var(--line));
+      background:
+        linear-gradient(var(--surface-strong), var(--surface-strong)) padding-box,
+        var(--brand-gradient) border-box;
+      color: var(--ink);
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .search-submit {
+      min-width: 92px;
+      padding: 0 20px;
+      border-radius: 25px;
+    }
+
+    .search-submit:hover,
+    .more-submit:hover,
+    .retry-submit:hover {
+      background:
+        linear-gradient(var(--surface-soft), var(--surface-soft)) padding-box,
+        var(--brand-gradient) border-box;
+    }
+
+    .search-submit:active,
+    .more-submit:active,
+    .retry-submit:active { transform: translateY(1px); }
+
+    .results-page,
+    .failure-page {
+      width: min(790px, 100%);
+      margin: 0 auto;
+      padding: 18px 24px 72px;
+    }
+
+    .results-page .wordmark,
+    .failure-page .wordmark {
+      justify-content: flex-start;
+      gap: 10px;
+      margin-bottom: 22px;
+      font-size: clamp(1.62rem, 4vw, 2rem);
+      letter-spacing: -0.04em;
+    }
+
+    .results-page [data-prairie-trusted-asset="semantic-search-logo"],
+    .failure-page [data-prairie-trusted-asset="semantic-search-logo"] {
+      width: 30px;
+      height: 30px;
+    }
+
+    .results-heading {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 34px 2px 14px;
+    }
+
+    .results-heading h2 {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      font-weight: 690;
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    .results-kicker {
+      margin: 0 0 5px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 720;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .results-count {
+      margin: 0 0 3px;
+      color: var(--muted);
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+
+    .results-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-card {
+      position: relative;
+      overflow: hidden;
+      padding: 21px 22px 19px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--surface);
+      box-shadow: 0 1px 2px rgba(25, 26, 31, 0.025);
+    }
+
+    .result-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      left: 0;
+      height: 2px;
+      background: var(--brand-gradient);
+      opacity: 0.58;
+    }
+
+    .result-card:hover {
+      border-color: var(--line-strong);
+      box-shadow: var(--shadow-soft);
+      transform: translateY(-1px);
+    }
+
+    .result-card > a {
+      display: inline-block;
+      max-width: 100%;
+      color: var(--ink);
+      font-size: 1.08rem;
+      font-weight: 720;
+      letter-spacing: -0.012em;
+      line-height: 1.32;
+      text-decoration-color: color-mix(in srgb, var(--focus) 42%, transparent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 4px;
+    }
+
+    .result-card > a:hover {
+      color: color-mix(in srgb, var(--ink) 70%, #815daf);
+      text-decoration-color: currentColor;
+    }
+
+    .result-source {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.012em;
+    }
+
+    .result-summary {
+      max-width: 68ch;
+      margin: 11px 0 0;
+      color: var(--muted);
+      font-size: 0.925rem;
+      line-height: 1.56;
+    }
+
+    .result-rating {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 15px;
+    }
+
+    .result-rating meter {
+      width: 116px;
+      height: 8px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--meter-track);
+    }
+
+    .result-rating meter::-webkit-meter-bar {
+      height: 8px;
+      border: 0;
+      border-radius: 999px;
+      background: var(--meter-track);
+      box-shadow: none;
+    }
+
+    .result-rating meter::-webkit-meter-optimum-value,
+    .result-rating meter::-webkit-meter-suboptimum-value,
+    .result-rating meter::-webkit-meter-even-less-good-value {
+      border-radius: 999px;
+      background: var(--brand-gradient);
+    }
+
+    .result-rating meter::-moz-meter-bar {
+      border-radius: 999px;
+      background: var(--brand-gradient);
+    }
+
+    .rating-score {
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 720;
+    }
+
+    .more-row {
+      display: flex;
+      justify-content: center;
+      padding-top: 28px;
+    }
+
+    .more-submit,
+    .retry-submit {
+      min-width: 152px;
+      padding: 0 20px;
+      border-radius: 16px;
+    }
+
+    .failure-panel {
+      margin-top: 34px;
+      padding: clamp(24px, 5vw, 38px);
+      border: 1px solid var(--error-line);
+      border-radius: 20px;
+      background: var(--error-surface);
+    }
+
+    .failure-panel h2 {
+      margin: 0;
+      font-size: clamp(1.35rem, 3vw, 1.75rem);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    .failure-panel p {
+      margin: 11px 0 22px;
+      color: var(--muted);
+      font-size: 0.93rem;
+      line-height: 1.5;
+    }
+
+    .site-credit {
+      position: fixed;
+      left: 10px;
+      bottom: 7px;
+      color: var(--faint);
+      font-size: 11px;
+      font-weight: 560;
+      letter-spacing: 0.02em;
+      pointer-events: none;
+      user-select: none;
+      opacity: 0.72;
+      z-index: 1;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .prairie-search-busy .wordmark-letter {
+      animation: wordmark-wave 1120ms cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      animation-delay: var(--wave-delay, 0ms);
+      will-change: transform;
+    }
+
+    .wordmark-letter:nth-child(1) { --wave-delay: 0ms; --gradient-position: 0%; }
+    .wordmark-letter:nth-child(2) { --wave-delay: 45ms; --gradient-position: 7.69%; }
+    .wordmark-letter:nth-child(3) { --wave-delay: 90ms; --gradient-position: 15.38%; }
+    .wordmark-letter:nth-child(4) { --wave-delay: 135ms; --gradient-position: 23.08%; }
+    .wordmark-letter:nth-child(5) { --wave-delay: 180ms; --gradient-position: 30.77%; }
+    .wordmark-letter:nth-child(6) { --wave-delay: 225ms; --gradient-position: 38.46%; }
+    .wordmark-letter:nth-child(7) { --wave-delay: 270ms; --gradient-position: 46.15%; }
+    .wordmark-letter:nth-child(8) { --wave-delay: 315ms; --gradient-position: 53.85%; }
+    .wordmark-letter:nth-child(9) { --wave-delay: 360ms; --gradient-position: 61.54%; }
+    .wordmark-letter:nth-child(10) { --wave-delay: 405ms; --gradient-position: 69.23%; }
+    .wordmark-letter:nth-child(11) { --wave-delay: 450ms; --gradient-position: 76.92%; }
+    .wordmark-letter:nth-child(12) { --wave-delay: 495ms; --gradient-position: 84.62%; }
+    .wordmark-letter:nth-child(13) { --wave-delay: 540ms; --gradient-position: 92.31%; }
+    .wordmark-letter:nth-child(14) { --wave-delay: 585ms; --gradient-position: 100%; }
+
+    @keyframes wordmark-wave {
+      0%, 58%, 100% { transform: translateY(0); }
+      24% { transform: translateY(-5px); }
+    }
+
+    @media (max-width: 620px) {
+      .utility-bar { padding: 8px 98px 8px 8px; }
+      .preferences { gap: 7px; }
+      .language-selector { border-radius: 14px; }
+      .theme-toggle { min-width: 64px; padding-inline: 9px; }
+      .inference-note { gap: 5px; font-size: 0.66rem; }
+      .title-page { padding: 20px 16px 96px; }
+      .wordmark { gap: 10px; margin-bottom: 28px; }
+      .search-shell { grid-template-columns: 42px minmax(0, 1fr) 50px; padding-left: 7px; }
+      .search-symbol { width: 40px; }
+      .search-symbol::before { left: 10px; }
+      .search-symbol::after { left: 23px; }
+      .search-submit { min-width: 48px; width: 48px; padding: 0; font-size: 0; }
+      .search-submit::after { content: "→"; font-size: 1.1rem; }
+      .results-page,
+      .failure-page { padding: 12px 16px 56px; }
+      .results-heading { align-items: start; flex-direction: column; gap: 4px; }
+      .result-card { padding: 19px 18px 17px; }
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .language-option,
+      .theme-toggle,
+      .search-shell,
+      .search-submit,
+      .more-submit,
+      .retry-submit,
+      .result-card,
+      .result-card > a {
+        transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 120ms ease;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .prairie-search-busy .wordmark-letter { animation: none; }
+      .prairie-search-busy .wordmark-text { opacity: 0.72; }
+    }
+
+    @media (forced-colors: active) {
+      .wordmark-text,
+      .wordmark-letter {
+        background: none;
+        color: CanvasText;
+        -webkit-text-fill-color: CanvasText;
+      }
+      .result-card::before { background: CanvasText; }
+      .search-submit,
+      .more-submit,
+      .retry-submit { border-color: ButtonText; background: ButtonFace; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="utility-bar" aria-label="Display preferences">
+      <div class="preferences">
+        <div class="language-selector" role="group" aria-label="Language">
+          <button class="language-option" type="button" lang="fr" data-prairie-action="set-language" data-prairie-language-option="fr" aria-label="Continuer en français" aria-pressed="false">FR</button>
+          <button class="language-option" type="button" lang="zh-CN" data-prairie-action="set-language" data-prairie-language-option="zh-CN" aria-label="继续使用中文" aria-pressed="false">中文</button>
+          <button class="language-option" type="button" lang="en" data-prairie-action="set-language" data-prairie-language-option="en" aria-label="Continue in English" aria-pressed="true">EN</button>
+        </div>
+        <button class="theme-toggle" type="button" data-prairie-action="toggle-theme" aria-label="Use dark theme" aria-pressed="false">
+          <span class="theme-glyph" aria-hidden="true">◐</span>
+          <span class="theme-label">Dark</span>
+        </button>
+        <span class="inference-note" role="note"><span class="inference-note-icon" aria-hidden="true">⚠️</span><span class="inference-note-text">setting changes will trigger inference</span></span>
+      </div>
+    </header>
+
+    <main class="title-page" data-prairie-query="">
+      <section class="title-stage" aria-labelledby="semantic-search-title">
+        <h1 class="wordmark" id="semantic-search-title" aria-label="Semantic Search">
+          <span data-prairie-trusted-asset="semantic-search-logo" aria-hidden="true"></span>
+          <span class="wordmark-text" aria-hidden="true"><span class="wordmark-letter">S</span><span class="wordmark-letter">e</span><span class="wordmark-letter">m</span><span class="wordmark-letter">a</span><span class="wordmark-letter">n</span><span class="wordmark-letter">t</span><span class="wordmark-letter">i</span><span class="wordmark-letter">c</span><span class="wordmark-letter wordmark-break">S</span><span class="wordmark-letter">e</span><span class="wordmark-letter">a</span><span class="wordmark-letter">r</span><span class="wordmark-letter">c</span><span class="wordmark-letter">h</span></span>
+        </h1>
+
+        <form class="search-form" id="search-form" data-prairie-tool="web-search">
+          <label class="visually-hidden" for="query">Search the web</label>
+          <div class="search-shell">
+            <span class="search-symbol" aria-hidden="true"></span>
+            <input id="query" name="query" type="search" value="" maxlength="2000" autocomplete="off" placeholder="Search the web" required autofocus>
+            <button class="search-submit" id="search-submit" type="submit">Search</button>
+          </div>
+        </form>
+      </section>
+    </main>
+    <span class="site-credit" aria-hidden="true">prairielabs.ai</span>
+  </div>
+</body>
+</html>
