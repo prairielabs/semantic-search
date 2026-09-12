@@ -94,8 +94,10 @@
     }
 
     .language-selector {
+      position: relative;
       display: flex;
       align-items: center;
+      width: min(210px, 34vw);
       padding: 2px;
       border: 1px solid var(--line);
       border-radius: 15px;
@@ -103,7 +105,7 @@
       box-shadow: 0 1px 2px rgba(25, 26, 31, 0.035);
     }
 
-    .language-option,
+    .language-abbreviation,
     .theme-toggle {
       min-height: 44px;
       border: 0;
@@ -112,19 +114,63 @@
       cursor: pointer;
     }
 
-    .language-option {
+    .language-abbreviation {
+      flex: 0 0 44px;
       width: 44px;
       padding: 0;
       border-radius: 12px;
+      background: var(--surface-strong);
+      color: var(--ink);
+      box-shadow: 0 2px 9px rgba(27, 26, 31, 0.09);
       font-size: 0.72rem;
       font-weight: 680;
       letter-spacing: 0.045em;
     }
 
-    .language-option[aria-pressed="true"] {
-      background: var(--surface-strong);
+    .language-input {
+      width: 100%;
+      min-width: 0;
+      height: 40px;
+      padding: 0 10px;
+      border: 0;
+      outline: 0;
+      background: transparent;
       color: var(--ink);
-      box-shadow: 0 2px 9px rgba(27, 26, 31, 0.09);
+      font-size: 0.78rem;
+    }
+
+    .language-input::placeholder {
+      color: var(--faint);
+      opacity: 1;
+    }
+
+    .language-prompt-cycle {
+      display: none;
+      position: absolute;
+      inset-inline: 56px 10px;
+      top: 50%;
+      height: 1.25em;
+      overflow: hidden;
+      transform: translateY(-50%);
+      color: var(--faint);
+      font-size: 0.78rem;
+      line-height: 1.25;
+      pointer-events: none;
+    }
+
+    .language-prompt-cycle > span {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      opacity: 0;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .language-selector:focus-within {
+      border-color: var(--focus);
+      outline: 3px solid color-mix(in srgb, var(--focus) 24%, transparent);
+      outline-offset: 2px;
     }
 
     .theme-toggle {
@@ -168,10 +214,11 @@
       line-height: 1;
     }
 
-    .language-option:hover,
+    .language-abbreviation:hover,
     .theme-toggle:hover { background: var(--surface-soft); }
 
-    .language-option:focus-visible,
+    .language-abbreviation:focus-visible,
+    .language-input:focus-visible,
     .theme-toggle:focus-visible,
     .search-submit:focus-visible,
     .more-submit:focus-visible,
@@ -231,14 +278,6 @@
     .wordmark-break { margin-inline-start: 0.24em; }
 
     @supports ((background-clip: text) or (-webkit-background-clip: text)) {
-      .wordmark-text {
-        background: var(--brand-gradient);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-      }
-
       .wordmark-letter {
         background: var(--brand-gradient);
         background-size: 1400% 100%;
@@ -629,7 +668,35 @@
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .language-option,
+      .language-selector:not(:focus-within) .language-input:placeholder-shown::placeholder {
+        color: transparent;
+      }
+
+      .language-selector:not(:focus-within) .language-input:placeholder-shown + .language-prompt-cycle {
+        display: block;
+      }
+
+      .language-prompt-cycle > span {
+        animation: language-prompt-cycle 32s linear infinite;
+      }
+
+      .language-prompt-cycle > span:nth-child(2) { animation-delay: 2s; }
+      .language-prompt-cycle > span:nth-child(3) { animation-delay: 4s; }
+      .language-prompt-cycle > span:nth-child(4) { animation-delay: 6s; }
+      .language-prompt-cycle > span:nth-child(5) { animation-delay: 8s; }
+      .language-prompt-cycle > span:nth-child(6) { animation-delay: 10s; }
+      .language-prompt-cycle > span:nth-child(7) { animation-delay: 12s; }
+      .language-prompt-cycle > span:nth-child(8) { animation-delay: 14s; }
+      .language-prompt-cycle > span:nth-child(9) { animation-delay: 16s; }
+      .language-prompt-cycle > span:nth-child(10) { animation-delay: 18s; }
+      .language-prompt-cycle > span:nth-child(11) { animation-delay: 20s; }
+      .language-prompt-cycle > span:nth-child(12) { animation-delay: 22s; }
+      .language-prompt-cycle > span:nth-child(13) { animation-delay: 24s; }
+      .language-prompt-cycle > span:nth-child(14) { animation-delay: 26s; }
+      .language-prompt-cycle > span:nth-child(15) { animation-delay: 28s; }
+      .language-prompt-cycle > span:nth-child(16) { animation-delay: 30s; }
+
+      .language-abbreviation,
       .theme-toggle,
       .search-shell,
       .search-submit,
@@ -639,6 +706,12 @@
       .result-card > a {
         transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease, color 150ms ease, transform 120ms ease;
       }
+    }
+
+    @keyframes language-prompt-cycle {
+      0% { opacity: 0; transform: translateY(3px); }
+      0.8%, 5.45% { opacity: 1; transform: translateY(0); }
+      6.25%, 100% { opacity: 0; transform: translateY(-3px); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -664,11 +737,13 @@
   <div class="page-shell">
     <header class="utility-bar" aria-label="Display preferences">
       <div class="preferences">
-        <div class="language-selector" role="group" aria-label="Language">
-          <button class="language-option" type="button" lang="fr" data-prairie-action="set-language" data-prairie-language-option="fr" aria-label="Continuer en français" aria-pressed="false">FR</button>
-          <button class="language-option" type="button" lang="zh-CN" data-prairie-action="set-language" data-prairie-language-option="zh-CN" aria-label="继续使用中文" aria-pressed="false">中文</button>
-          <button class="language-option" type="button" lang="en" data-prairie-action="set-language" data-prairie-language-option="en" aria-label="Continue in English" aria-pressed="true">EN</button>
-        </div>
+        <form class="language-selector" id="language-form" data-prairie-action="set-language" aria-label="Translate page">
+          <button class="language-abbreviation" type="submit" aria-label="Translate page to entered language">EN</button>
+          <label class="visually-hidden" for="language-input">Language</label>
+          <input class="language-input" id="language-input" name="language" type="text" value="" maxlength="80" autocomplete="off" placeholder="Any language" aria-describedby="language-hint">
+          <span class="language-prompt-cycle" aria-hidden="true"><span lang="en">Any language</span><span lang="es">Cualquier idioma</span><span lang="zh">任何语言</span><span lang="hi">कोई भी भाषा</span><span lang="ar" dir="rtl">أي لغة</span><span lang="fr">Toute langue</span><span lang="pt">Qualquer idioma</span><span lang="bn">যেকোনো ভাষা</span><span lang="ru">Любой язык</span><span lang="ur" dir="rtl">کوئی بھی زبان</span><span lang="id">Bahasa apa pun</span><span lang="de">Jede Sprache</span><span lang="ja">どの言語でも</span><span lang="sw">Lugha yoyote</span><span lang="ko">어떤 언어든</span><span lang="tr">Herhangi bir dil</span></span>
+          <span class="visually-hidden" id="language-hint">Enter any language and press Enter</span>
+        </form>
         <button class="theme-toggle" type="button" data-prairie-action="toggle-theme" aria-label="Use dark theme" aria-pressed="false">
           <span class="theme-glyph" aria-hidden="true">◐</span>
           <span class="theme-label">Dark</span>

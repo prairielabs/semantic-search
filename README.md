@@ -34,6 +34,12 @@ Extracted from the private Prairie Labs platform, where Semantic Search has ship
 
 MIT licensed.
 
-## 2026-09-02 patch
+## Free hosted codes
+
+Twenty first-come Semantic Search codes are available in [`FREE-CODES.md`](FREE-CODES.md). Each includes a $1 lifetime inference allowance and opens the hosted application at [gensim.co](https://gensim.co).
+
+## Current patches
 
 The program now parses before it judges: `ParseRetrieval` reduces trusted live-search output to a bounded candidate table, and `EvaluateAndRank` spends its judgment on that table. A runtime that carries a model choice defaults to Luna. Both are recorded as `PATCH 2026-09-02` in `context.md` §13; the page itself is unchanged.
+
+The `2026-09-11` patches make universal-language search explicit. The fixed language choices are now one abbreviation plus an open text field. A model must choose the most plausible language for every nonblank entry, translate the complete interface live, and prefer sources in that language. The empty field calmly cycles through sixteen major languages to make that capability visible.

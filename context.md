@@ -94,7 +94,8 @@ CONST APP_MARKER              = "semantic-search"
 CONST STATE_VERSION           = "2"
 CONST PAGES                   = "title | results | failure"
 CONST THEMES                  = "light | dark"
-CONST LANGUAGES               = "en | fr | zh-CN"
+CONST DEFAULT_LANGUAGE        = "English | en | EN"
+CONST LANGUAGE_RANGE          = "any language the operating model recognizes"
 CONST RESULTS_INITIAL         = 5
 CONST RESULTS_PER_EXPANSION   = 5
 CONST RESULTS_MAX             = 20
@@ -254,7 +255,7 @@ END
 PRINCIPLE Language_Native
 
     The selected language governs more than labels: a person searching in
-    French is best served by strong French-language pages. Follow the
+    Japanese is best served by strong Japanese-language pages. Follow the
     selected language when seeking and ranking sources, not only when
     rendering the interface.
 
@@ -273,7 +274,9 @@ The trusted root identity and preference state carried on every page.
     version   : text [literal]     — data-prairie-version="2"
     page      : text               — data-prairie-page: title | results | failure
     theme     : text               — data-prairie-theme: light | dark
-    language  : text               — data-prairie-language: en | fr | zh-CN
+    language  : text               — recognized BCP 47 language tag
+    language_name : text           — the person's exact entered language name
+    language_abbreviation : text   — short uppercase code shown in the control
     lang      : text               — lang attribute, exactly matching language
     query     : text               — the one data-prairie-query element's value
 
@@ -326,7 +329,9 @@ STRUCTURE Preferences
 Trusted local interface state.
 
     theme    : text                — light | dark
-    language : text                — en | fr | zh-CN
+    language : text                — recognized BCP 47 language tag
+    language_name : text           — exact entered language name
+    language_abbreviation : text   — short uppercase code, normally 2–3 letters
 
 END
 
@@ -573,7 +578,15 @@ PROCESS:
             result articles are retained and their canonical destinations
             excluded;
             RENDER ResultsPage on success, FailurePage on failure
-        IF set-language OR toggle-theme THEN
+        IF set-language THEN
+            read the open language field. If the language is confidently
+            recognized, derive its BCP 47 tag and short uppercase abbreviation,
+            then rewrite the complete current page in that language. The model
+            itself performs the translation; no translation service or fixed
+            language menu is involved. Preserve page type, exact query, direct
+            URLs, source identity, result order, and numeric scores;
+            RENDER the current page in the new language state
+        IF toggle-theme THEN
             a trusted local interaction; no retrieval, no new source
             authority; rewrite the current page per §9 LOCALIZATION,
             preserving page type, exact query, direct URLs, source
@@ -606,12 +619,16 @@ END
 
 INVARIANT Language_Selector
 
-    French, Chinese, and English controls stay at the top left in the exact
-    visible order FR / 中文 / EN, beside the light/dark toggle and away from
-    Prairie's trusted Home control. Each language button has
-    data-prairie-action="set-language" and the matching
-    data-prairie-language-option of fr, zh-CN, or en. The selected button
-    uses aria-pressed="true". The theme button has
+    One compact language form stays at the top left, beside the light/dark
+    toggle and away from Prairie's trusted Home control. It contains only the
+    selected language's short uppercase abbreviation as its submit control and
+    one open text input where a person may enter any language name. The form
+    has data-prairie-action="set-language"; Enter and the abbreviation button
+    submit identically. On a recognized entry, preserve the exact entered name,
+    derive an appropriate BCP 47 tag and familiar two- or three-letter uppercase
+    abbreviation, and translate the complete page through the operating model.
+    If the entry is blank or cannot be confidently recognized as a language,
+    preserve the current page and language unchanged. The theme button has
     data-prairie-action="toggle-theme" and accurately labels the opposite
     theme as its action.
 
@@ -622,7 +639,8 @@ INVARIANT Localized_Surface
     Localize every visible and accessible interface label, the wordmark
     name, the settings disclaimer, every summary, error, source descriptor,
     rating label, retry label, and search-more label in the selected
-    language. Do not call a translation service. Keep source proper names
+    language. The operating model performs the translation; do not call a
+    translation service. Keep source proper names
     and direct URLs faithful to trusted source data. Preserve the selected
     theme and language across every later rewrite.
 
@@ -630,27 +648,19 @@ END
 
 INVARIANT Wordmark_Names
 
-    The wordmark name renders in the selected language:
-        en    — "Semantic Search"     (14 letter spans, one .wordmark-break
-                                       before the second word)
-        fr    — "Recherche Sémantique" (19 letter spans, .wordmark-break
-                                       before "Sémantique"; é is one
-                                       precomposed character in one span)
-        zh-CN — "语义搜索"              (4 contiguous character spans, no
-                                       .wordmark-break, near-zero
-                                       letter-spacing; the CJK system-font
-                                       fallback is expected)
-    The document <title> and the wordmark's accessible name carry the same
-    localized name.
+    Translate "Semantic Search" naturally into the selected language. The
+    document <title>, accessible wordmark name, and visible wordmark carry the
+    same localized name. Keep every visible character in its own
+    .wordmark-letter span; apply .wordmark-break before each word after the
+    first, and use near-zero letter-spacing for scripts that require it.
 
 END
 
 INVARIANT Disclaimer_Strings
 
-    The settings disclaimer sentence is exactly:
-        en    "setting changes will trigger inference"
-        fr    "les changements de réglages déclenchent une inférence"
-        zh-CN "更改设置将触发推理"
+    English seed: "setting changes will trigger inference". Translate this
+    sentence faithfully into the selected language without naming a provider,
+    model, or internal detail.
 
 END
 
@@ -795,7 +805,7 @@ INVARIANT Root_Markers
         data-prairie-version="2"
         data-prairie-page="title", "results", or "failure"
         data-prairie-theme="light" or "dark"
-        data-prairie-language="en", "fr", or "zh-CN"
+        data-prairie-language set to the recognized BCP 47 language tag
         lang equal to the exact language marker
 
 END
@@ -1017,8 +1027,8 @@ PATCH_RULES:
       LOCALIZATION, and DISCRETION bounds.
     - A patch may not override an AXIOM, weaken §11 or StaticSecurity,
       alter the trusted-runtime markers the validator expects, or change
-      the exact strings in Disclaimer_Strings, Wordmark_Names, or
-      CREDIT_TEXT.
+      CREDIT_TEXT. Localized wordmark and disclaimer text must continue to
+      obey their §9 invariants.
     - An unclear or conflicting patch is resolved by system discretion
       toward Information_First.
 
@@ -1084,6 +1094,62 @@ CURRENT PATCHES:
                 reading provider prose is not, once it is a table.
         affected_sections: §2 CONSTANTS, §5 STRUCTURES, §7 SEARCH DOCTRINE,
                 §8 TURN KERNEL (routing only; authority unchanged)
+        status: active
+
+    PATCH 2026-09-11
+        scope: language preference and complete-surface localization
+        change: replaced the fixed French / Chinese / English button group
+                with one current-language abbreviation and an open language
+                text field. A recognized language name now becomes the
+                interface language, source-language preference, BCP 47 page
+                marker, and short displayed abbreviation. The operating model
+                translates the whole page without a translation service.
+        reason: operator directive — expose prompt-native translation as a
+                distinctive capability of Semantic Search
+        affected_sections: §2 CONSTANTS, §4 PRINCIPLES, §5 STRUCTURES,
+                §8 TURN KERNEL, §9 LOCALIZATION, §12 TECHNICAL CONTRACT
+        status: active
+
+    PATCH 2026-09-11
+        scope: open language control presentation
+        change: while the language field is empty and unfocused, its prompt
+                cycles crisply through "Any language" in sixteen widely used
+                languages, holding each phrase for two seconds and completing
+                the full loop in thirty-two seconds. Focusing or typing immediately restores the
+                ordinary open field; reduced-motion users retain one still
+                localized placeholder. The cycle is illustrative only and
+                does not limit which language the operating model accepts.
+        reason: operator directive — make universal, live model translation
+                legible at first glance and give each represented language a
+                recurring equal presentation
+        affected_sections: §6 PAGES, §9 LOCALIZATION, §12 TECHNICAL CONTRACT
+        status: active
+
+    PATCH 2026-09-11
+        scope: language intent resolution and live-search provenance parsing
+        change: every nonblank language entry must resolve to the single most
+                plausible language. The model may correct misspellings and
+                infer a language from endonyms, abbreviations, regions,
+                nationalities, countries, or informal descriptions; when
+                several languages are plausible it chooses the most widely
+                used associated official language. There is no unrecognized-
+                language or no-translation outcome. Live-search citations and
+                search-result records remain equally authoritative whether the
+                compatible transport supplies them at the response root, in
+                provider metadata, in a standardized source collection, or as
+                explicit URL-citation annotations. When a raw Gateway transport
+                omits the separate citation collection, the schema-constrained
+                result records returned by the dedicated Sonar live-search call
+                are the provider source table; never extract URLs from freeform
+                prose. Only safe URLs present in those records may render.
+                Authentication, allowance, and missing-provenance
+                failures remain distinct so the interface can give a truthful
+                recovery instruction.
+        reason: operator directive — universal language search must choose a
+                language, and live provider evidence must not be discarded by
+                a transport-shape mismatch
+        affected_sections: §2 CONSTANTS, §4 PRINCIPLES, §7 SEARCH DOCTRINE,
+                §9 LOCALIZATION, §12 TECHNICAL CONTRACT
         status: active
 
 USER INPUTS:
