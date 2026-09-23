@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "sources": {
+      "type": "array",
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": {"type": "string"},
+          "url": {"type": "string"},
+          "snippet": {"type": "string"}
+        },
+        "required": ["title", "url", "snippet"],
+        "additionalProperties": false
+      }
+    },
+    "error": {"type": ["string", "null"]}
+  },
+  "required": ["sources", "error"],
+  "additionalProperties": false
+}

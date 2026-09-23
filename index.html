@@ -677,24 +677,24 @@
       }
 
       .language-prompt-cycle > span {
-        animation: language-prompt-cycle 32s linear infinite;
+        animation: language-prompt-cycle 80s linear infinite;
       }
 
-      .language-prompt-cycle > span:nth-child(2) { animation-delay: 2s; }
-      .language-prompt-cycle > span:nth-child(3) { animation-delay: 4s; }
-      .language-prompt-cycle > span:nth-child(4) { animation-delay: 6s; }
-      .language-prompt-cycle > span:nth-child(5) { animation-delay: 8s; }
-      .language-prompt-cycle > span:nth-child(6) { animation-delay: 10s; }
-      .language-prompt-cycle > span:nth-child(7) { animation-delay: 12s; }
-      .language-prompt-cycle > span:nth-child(8) { animation-delay: 14s; }
-      .language-prompt-cycle > span:nth-child(9) { animation-delay: 16s; }
-      .language-prompt-cycle > span:nth-child(10) { animation-delay: 18s; }
-      .language-prompt-cycle > span:nth-child(11) { animation-delay: 20s; }
-      .language-prompt-cycle > span:nth-child(12) { animation-delay: 22s; }
-      .language-prompt-cycle > span:nth-child(13) { animation-delay: 24s; }
-      .language-prompt-cycle > span:nth-child(14) { animation-delay: 26s; }
-      .language-prompt-cycle > span:nth-child(15) { animation-delay: 28s; }
-      .language-prompt-cycle > span:nth-child(16) { animation-delay: 30s; }
+      .language-prompt-cycle > span:nth-child(2) { animation-delay: 5s; }
+      .language-prompt-cycle > span:nth-child(3) { animation-delay: 10s; }
+      .language-prompt-cycle > span:nth-child(4) { animation-delay: 15s; }
+      .language-prompt-cycle > span:nth-child(5) { animation-delay: 20s; }
+      .language-prompt-cycle > span:nth-child(6) { animation-delay: 25s; }
+      .language-prompt-cycle > span:nth-child(7) { animation-delay: 30s; }
+      .language-prompt-cycle > span:nth-child(8) { animation-delay: 35s; }
+      .language-prompt-cycle > span:nth-child(9) { animation-delay: 40s; }
+      .language-prompt-cycle > span:nth-child(10) { animation-delay: 45s; }
+      .language-prompt-cycle > span:nth-child(11) { animation-delay: 50s; }
+      .language-prompt-cycle > span:nth-child(12) { animation-delay: 55s; }
+      .language-prompt-cycle > span:nth-child(13) { animation-delay: 60s; }
+      .language-prompt-cycle > span:nth-child(14) { animation-delay: 65s; }
+      .language-prompt-cycle > span:nth-child(15) { animation-delay: 70s; }
+      .language-prompt-cycle > span:nth-child(16) { animation-delay: 75s; }
 
       .language-abbreviation,
       .theme-toggle,
@@ -710,7 +710,7 @@
 
     @keyframes language-prompt-cycle {
       0% { opacity: 0; transform: translateY(3px); }
-      0.8%, 5.45% { opacity: 1; transform: translateY(0); }
+      0.32%, 5.93% { opacity: 1; transform: translateY(0); }
       6.25%, 100% { opacity: 0; transform: translateY(-3px); }
     }
 
@@ -740,15 +740,15 @@
         <form class="language-selector" id="language-form" data-prairie-action="set-language" aria-label="Translate page">
           <button class="language-abbreviation" type="submit" aria-label="Translate page to entered language">EN</button>
           <label class="visually-hidden" for="language-input">Language</label>
-          <input class="language-input" id="language-input" name="language" type="text" value="" maxlength="80" autocomplete="off" placeholder="Any language" aria-describedby="language-hint">
-          <span class="language-prompt-cycle" aria-hidden="true"><span lang="en">Any language</span><span lang="es">Cualquier idioma</span><span lang="zh">任何语言</span><span lang="hi">कोई भी भाषा</span><span lang="ar" dir="rtl">أي لغة</span><span lang="fr">Toute langue</span><span lang="pt">Qualquer idioma</span><span lang="bn">যেকোনো ভাষা</span><span lang="ru">Любой язык</span><span lang="ur" dir="rtl">کوئی بھی زبان</span><span lang="id">Bahasa apa pun</span><span lang="de">Jede Sprache</span><span lang="ja">どの言語でも</span><span lang="sw">Lugha yoyote</span><span lang="ko">어떤 언어든</span><span lang="tr">Herhangi bir dil</span></span>
+          <input class="language-input" id="language-input" name="language" type="text" value="" maxlength="80" autocomplete="off" placeholder="English" aria-describedby="language-hint">
+          <span class="language-prompt-cycle" aria-hidden="true"><span lang="en">English</span><span lang="es">Español</span><span lang="zh">中文</span><span lang="hi">हिन्दी</span><span lang="ar" dir="rtl">العربية</span><span lang="fr">Français</span><span lang="pt">Português</span><span lang="bn">বাংলা</span><span lang="ru">Русский</span><span lang="ur" dir="rtl">اردو</span><span lang="id">Bahasa Indonesia</span><span lang="de">Deutsch</span><span lang="ja">日本語</span><span lang="sw">Kiswahili</span><span lang="ko">한국어</span><span lang="tr">Türkçe</span></span>
           <span class="visually-hidden" id="language-hint">Enter any language and press Enter</span>
         </form>
         <button class="theme-toggle" type="button" data-prairie-action="toggle-theme" aria-label="Use dark theme" aria-pressed="false">
           <span class="theme-glyph" aria-hidden="true">◐</span>
           <span class="theme-label">Dark</span>
         </button>
-        <span class="inference-note" role="note"><span class="inference-note-icon" aria-hidden="true">⚠️</span><span class="inference-note-text">setting changes will trigger inference</span></span>
+        <span class="inference-note" role="note"><span class="inference-note-icon" aria-hidden="true">⚠️</span><span class="inference-note-text">Settings changes will trigger inference</span></span>
       </div>
     </header>
 
@@ -767,6 +767,7 @@
             <button class="search-submit" id="search-submit" type="submit">Search</button>
           </div>
         </form>
+        <p role="note" style="color:var(--muted);font-size:0.85rem;margin-top:24px">This is the interface preview. To search, run <code>python3 start.py</code> from the downloaded repository and open the URL it prints.</p>
       </section>
     </main>
     <span class="site-credit" aria-hidden="true">prairielabs.ai</span>

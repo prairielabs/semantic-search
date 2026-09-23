@@ -1,0 +1,8 @@
+# Local evidence and runtime state are not part of the public distribution.
+/receipts/
+__pycache__/
+*.pyc
+*.log
+.DS_Store
+.env
+.env.*
