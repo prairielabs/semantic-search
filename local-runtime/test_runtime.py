@@ -68,7 +68,7 @@ class RuntimeTests(unittest.TestCase):
                 runtime.codex_json('test', {})
 
     def test_static_preview_notice_is_absent_from_connected_app(self):
-        self.assertIn('interface preview', (runtime.ROOT/'index.html').read_text())
+        self.assertIn('interface preview', (runtime.ROOT/'index.html').read_text(encoding='utf-8'))
         page=runtime.render(runtime.new_state())
         self.assertNotIn('interface preview', page)
         self.assertIn('Settings changes will trigger inference', page)
