@@ -40,6 +40,25 @@ Keep the terminal open while using the app; press Ctrl+C to stop.
 **Do not open `index.html` directly or use a plain static server to run searches.**
 Those show the interface without connecting its controls. Use `start.py`.
 
+## Custom filters
+
+Choose **Custom filters** below the search field to create a named preset with
+editable criteria, such as “Original research only; exclude opinion articles.”
+Save it, select it beside **Filter**, then search normally. Edit or delete presets
+in the same panel; choose **All sources** for an unfiltered search.
+
+Search and “Search for more” use the criteria captured when that search began.
+Changing a preset affects the next search; the original criteria remain visible
+above existing results. Matches are assessed from retrieved titles, URLs and
+snippets. Uncertain matches are omitted; a batch may return no matches without
+being an error. This does not verify every statement on the complete page.
+
+Up to 20 filters, with unique names of 60 characters and criteria of 2,000
+characters. Presets survive refresh in the same running browser session. They
+are held in memory, separate from other sessions, and reset when the server
+stops. Creating, editing and deleting filters do not use model allowance;
+searches send the selected criteria along with the query to Codex.
+
 ## Having trouble?
 
 - **Codex missing or too old:** install/update it with `npm install -g @openai/codex@latest`.

@@ -44,10 +44,22 @@ failure retains the query and a retry control; expansion failure retains
 existing results. Progress uses the existing wordmark wave and an accessible
 status, without adding a visible loading label.
 
+## Filter contract
+
+Presets are server-side session data: stable ID, unique name, criteria. CRUD is
+validated before mutation and does not acquire the model lock. Search snapshots
+the selected preset; retry and expansion use that snapshot even if the preset
+is edited or deleted. New searches replace the snapshot explicitly. Retrieval
+receives the criteria without rewriting the query; ranking returns only source
+IDs with positive filter compliance and evidence from the candidate fields.
+An empty valid filtered batch is distinct from a model or retrieval failure.
+Names/criteria are escaped in HTML and script-safe JSON; limits are 20 presets,
+60 name characters and 2,000 criteria characters. No persistent disk storage.
+
 ## Verification
 
 ```sh
-python3 -m unittest discover -s local-runtime -p test_runtime.py
+python3 -m unittest discover -s local-runtime -p "test*.py"
 python3 start.py --check
 ```
 
